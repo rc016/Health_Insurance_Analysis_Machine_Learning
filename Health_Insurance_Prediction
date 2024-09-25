@@ -1,0 +1,733 @@
+# This Data contains various variables which affect the insurance charges.
+# The dependent variable charges contains continuous type of data, Hence Linear regression is applied for machine learning
+In [1]:
+import pandas as pd 
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+In [5]:
+df=pd.read_csv('new_insurance_data (2).csv')
+In [6]:
+df
+Out[6]:
+	age	sex	bmi	children	smoker	Claim_Amount	past_consultations	num_of_steps	Hospital_expenditure	NUmber_of_past_hospitalizations	Anual_Salary	region	charges
+0	18.0	male	23.210	0.0	no	29087.54313	17.0	715428.0	4.720921e+06	0.0	5.578497e+07	southeast	1121.87390
+1	18.0	male	30.140	0.0	no	39053.67437	7.0	699157.0	4.329832e+06	0.0	1.370089e+07	southeast	1131.50660
+2	18.0	male	33.330	0.0	no	39023.62759	19.0	702341.0	6.884861e+06	0.0	7.352311e+07	southeast	1135.94070
+3	18.0	male	33.660	0.0	no	28185.39332	11.0	700250.0	4.274774e+06	0.0	7.581968e+07	southeast	1136.39940
+4	18.0	male	34.100	0.0	no	14697.85941	16.0	711584.0	3.787294e+06	0.0	2.301232e+07	southeast	1137.01100
+...	...	...	...	...	...	...	...	...	...	...	...	...	...
+1333	33.0	female	35.530	0.0	yes	63142.25346	32.0	1091267.0	1.703805e+08	2.0	3.101107e+09	northwest	55135.40209
+1334	31.0	female	38.095	1.0	yes	43419.95227	31.0	1107872.0	2.015152e+08	2.0	3.484216e+09	northeast	58571.07448
+1335	52.0	male	34.485	3.0	yes	52458.92353	25.0	1092005.0	2.236450e+08	2.0	3.640807e+09	northwest	60021.39897
+1336	45.0	male	30.360	0.0	yes	69927.51664	34.0	1106821.0	2.528924e+08	3.0	4.006359e+09	southeast	62592.87309
+1337	54.0	female	47.410	0.0	yes	63982.80926	31.0	1100328.0	2.616317e+08	3.0	4.117197e+09	southeast	63770.42801
+1338 rows × 13 columns
+In [7]:
+df
+Out[7]:
+	age	sex	bmi	children	smoker	Claim_Amount	past_consultations	num_of_steps	Hospital_expenditure	NUmber_of_past_hospitalizations	Anual_Salary	region	charges
+0	18.0	male	23.210	0.0	no	29087.54313	17.0	715428.0	4.720921e+06	0.0	5.578497e+07	southeast	1121.87390
+1	18.0	male	30.140	0.0	no	39053.67437	7.0	699157.0	4.329832e+06	0.0	1.370089e+07	southeast	1131.50660
+2	18.0	male	33.330	0.0	no	39023.62759	19.0	702341.0	6.884861e+06	0.0	7.352311e+07	southeast	1135.94070
+3	18.0	male	33.660	0.0	no	28185.39332	11.0	700250.0	4.274774e+06	0.0	7.581968e+07	southeast	1136.39940
+4	18.0	male	34.100	0.0	no	14697.85941	16.0	711584.0	3.787294e+06	0.0	2.301232e+07	southeast	1137.01100
+...	...	...	...	...	...	...	...	...	...	...	...	...	...
+1333	33.0	female	35.530	0.0	yes	63142.25346	32.0	1091267.0	1.703805e+08	2.0	3.101107e+09	northwest	55135.40209
+1334	31.0	female	38.095	1.0	yes	43419.95227	31.0	1107872.0	2.015152e+08	2.0	3.484216e+09	northeast	58571.07448
+1335	52.0	male	34.485	3.0	yes	52458.92353	25.0	1092005.0	2.236450e+08	2.0	3.640807e+09	northwest	60021.39897
+1336	45.0	male	30.360	0.0	yes	69927.51664	34.0	1106821.0	2.528924e+08	3.0	4.006359e+09	southeast	62592.87309
+1337	54.0	female	47.410	0.0	yes	63982.80926	31.0	1100328.0	2.616317e+08	3.0	4.117197e+09	southeast	63770.42801
+1338 rows × 13 columns
+In [8]:
+df.describe()
+Out[8]:
+	age	bmi	children	Claim_Amount	past_consultations	num_of_steps	Hospital_expenditure	NUmber_of_past_hospitalizations	Anual_Salary	charges
+count	1329.000000	1335.000000	1333.000000	1324.000000	1332.000000	1.335000e+03	1.334000e+03	1336.000000	1.332000e+03	1338.000000
+mean	39.310008	30.665112	1.090773	33361.327180	15.216216	9.100047e+05	1.584179e+07	1.060629	3.696849e+08	13270.422265
+std	14.034818	6.101690	1.201856	15617.288337	7.467723	9.188612e+04	2.669305e+07	0.533583	5.668843e+08	12110.011237
+min	18.000000	15.960000	0.000000	1920.136268	1.000000	6.954300e+05	2.945253e+04	0.000000	2.747072e+06	1121.873900
+25%	27.000000	26.302500	0.000000	20768.860390	9.000000	8.471995e+05	4.077633e+06	1.000000	7.701932e+07	4740.287150
+50%	39.000000	30.400000	1.000000	33700.310675	15.000000	9.143000e+05	7.490337e+06	1.000000	1.419361e+08	9382.033000
+75%	51.000000	34.687500	2.000000	45052.331957	20.000000	9.716840e+05	1.084082e+07	1.000000	3.243499e+08	16639.912515
+max	64.000000	53.130000	5.000000	77277.988480	40.000000	1.107872e+06	2.616317e+08	3.000000	4.117197e+09	63770.428010
+In [9]:
+df.describe(include='all')
+Out[9]:
+	age	sex	bmi	children	smoker	Claim_Amount	past_consultations	num_of_steps	Hospital_expenditure	NUmber_of_past_hospitalizations	Anual_Salary	region	charges
+count	1329.000000	1338	1335.000000	1333.000000	1338	1324.000000	1332.000000	1.335000e+03	1.334000e+03	1336.000000	1.332000e+03	1338	1338.000000
+unique	NaN	2	NaN	NaN	2	NaN	NaN	NaN	NaN	NaN	NaN	4	NaN
+top	NaN	male	NaN	NaN	no	NaN	NaN	NaN	NaN	NaN	NaN	southeast	NaN
+freq	NaN	676	NaN	NaN	1064	NaN	NaN	NaN	NaN	NaN	NaN	364	NaN
+mean	39.310008	NaN	30.665112	1.090773	NaN	33361.327180	15.216216	9.100047e+05	1.584179e+07	1.060629	3.696849e+08	NaN	13270.422265
+std	14.034818	NaN	6.101690	1.201856	NaN	15617.288337	7.467723	9.188612e+04	2.669305e+07	0.533583	5.668843e+08	NaN	12110.011237
+min	18.000000	NaN	15.960000	0.000000	NaN	1920.136268	1.000000	6.954300e+05	2.945253e+04	0.000000	2.747072e+06	NaN	1121.873900
+25%	27.000000	NaN	26.302500	0.000000	NaN	20768.860390	9.000000	8.471995e+05	4.077633e+06	1.000000	7.701932e+07	NaN	4740.287150
+50%	39.000000	NaN	30.400000	1.000000	NaN	33700.310675	15.000000	9.143000e+05	7.490337e+06	1.000000	1.419361e+08	NaN	9382.033000
+75%	51.000000	NaN	34.687500	2.000000	NaN	45052.331957	20.000000	9.716840e+05	1.084082e+07	1.000000	3.243499e+08	NaN	16639.912515
+max	64.000000	NaN	53.130000	5.000000	NaN	77277.988480	40.000000	1.107872e+06	2.616317e+08	3.000000	4.117197e+09	NaN	63770.428010
+In [10]:
+df['Hospital_expenditure'].sum()
+Out[10]:
+21132950453.337234
+In [11]:
+df.describe(include='all').T
+Out[11]:
+	count	unique	top	freq	mean	std	min	25%	50%	75%	max
+age	1329.0	NaN	NaN	NaN	39.310008	14.034818	18.0	27.0	39.0	51.0	64.0
+sex	1338	2	male	676	NaN	NaN	NaN	NaN	NaN	NaN	NaN
+bmi	1335.0	NaN	NaN	NaN	30.665112	6.10169	15.96	26.3025	30.4	34.6875	53.13
+children	1333.0	NaN	NaN	NaN	1.090773	1.201856	0.0	0.0	1.0	2.0	5.0
+smoker	1338	2	no	1064	NaN	NaN	NaN	NaN	NaN	NaN	NaN
+Claim_Amount	1324.0	NaN	NaN	NaN	33361.32718	15617.288337	1920.136268	20768.86039	33700.310675	45052.331957	77277.98848
+past_consultations	1332.0	NaN	NaN	NaN	15.216216	7.467723	1.0	9.0	15.0	20.0	40.0
+num_of_steps	1335.0	NaN	NaN	NaN	910004.69588	91886.119592	695430.0	847199.5	914300.0	971684.0	1107872.0
+Hospital_expenditure	1334.0	NaN	NaN	NaN	15841791.944031	26693047.737619	29452.53296	4077633.13725	7490336.905	10840822.095	261631699.3
+NUmber_of_past_hospitalizations	1336.0	NaN	NaN	NaN	1.060629	0.533583	0.0	1.0	1.0	1.0	3.0
+Anual_Salary	1332.0	NaN	NaN	NaN	369684859.703372	566884292.110671	2747071.908	77019322.7925	141936093.2	324349867.375	4117196637.0
+region	1338	4	southeast	364	NaN	NaN	NaN	NaN	NaN	NaN	NaN
+charges	1338.0	NaN	NaN	NaN	13270.422265	12110.011237	1121.8739	4740.28715	9382.033	16639.912515	63770.42801
+In [12]:
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1338 entries, 0 to 1337
+Data columns (total 13 columns):
+ #   Column                           Non-Null Count  Dtype  
+---  ------                           --------------  -----  
+ 0   age                              1329 non-null   float64
+ 1   sex                              1338 non-null   object 
+ 2   bmi                              1335 non-null   float64
+ 3   children                         1333 non-null   float64
+ 4   smoker                           1338 non-null   object 
+ 5   Claim_Amount                     1324 non-null   float64
+ 6   past_consultations               1332 non-null   float64
+ 7   num_of_steps                     1335 non-null   float64
+ 8   Hospital_expenditure             1334 non-null   float64
+ 9   NUmber_of_past_hospitalizations  1336 non-null   float64
+ 10  Anual_Salary                     1332 non-null   float64
+ 11  region                           1338 non-null   object 
+ 12  charges                          1338 non-null   float64
+dtypes: float64(10), object(3)
+memory usage: 136.0+ KB
+In [13]:
+df.isnull()
+Out[13]:
+	age	sex	bmi	children	smoker	Claim_Amount	past_consultations	num_of_steps	Hospital_expenditure	NUmber_of_past_hospitalizations	Anual_Salary	region	charges
+0	False	False	False	False	False	False	False	False	False	False	False	False	False
+1	False	False	False	False	False	False	False	False	False	False	False	False	False
+2	False	False	False	False	False	False	False	False	False	False	False	False	False
+3	False	False	False	False	False	False	False	False	False	False	False	False	False
+4	False	False	False	False	False	False	False	False	False	False	False	False	False
+...	...	...	...	...	...	...	...	...	...	...	...	...	...
+1333	False	False	False	False	False	False	False	False	False	False	False	False	False
+1334	False	False	False	False	False	False	False	False	False	False	False	False	False
+1335	False	False	False	False	False	False	False	False	False	False	False	False	False
+1336	False	False	False	False	False	False	False	False	False	False	False	False	False
+1337	False	False	False	False	False	False	False	False	False	False	False	False	False
+1338 rows × 13 columns
+In [14]:
+df.isna()
+Out[14]:
+	age	sex	bmi	children	smoker	Claim_Amount	past_consultations	num_of_steps	Hospital_expenditure	NUmber_of_past_hospitalizations	Anual_Salary	region	charges
+0	False	False	False	False	False	False	False	False	False	False	False	False	False
+1	False	False	False	False	False	False	False	False	False	False	False	False	False
+2	False	False	False	False	False	False	False	False	False	False	False	False	False
+3	False	False	False	False	False	False	False	False	False	False	False	False	False
+4	False	False	False	False	False	False	False	False	False	False	False	False	False
+...	...	...	...	...	...	...	...	...	...	...	...	...	...
+1333	False	False	False	False	False	False	False	False	False	False	False	False	False
+1334	False	False	False	False	False	False	False	False	False	False	False	False	False
+1335	False	False	False	False	False	False	False	False	False	False	False	False	False
+1336	False	False	False	False	False	False	False	False	False	False	False	False	False
+1337	False	False	False	False	False	False	False	False	False	False	False	False	False
+1338 rows × 13 columns
+In [15]:
+df.isna().sum()
+Out[15]:
+age                                 9
+sex                                 0
+bmi                                 3
+children                            5
+smoker                              0
+Claim_Amount                       14
+past_consultations                  6
+num_of_steps                        3
+Hospital_expenditure                4
+NUmber_of_past_hospitalizations     2
+Anual_Salary                        6
+region                              0
+charges                             0
+dtype: int64
+In [16]:
+df['age']=df['age'].fillna(df['age'].mean())
+In [17]:
+df.isnull().sum()
+Out[17]:
+age                                 0
+sex                                 0
+bmi                                 3
+children                            5
+smoker                              0
+Claim_Amount                       14
+past_consultations                  6
+num_of_steps                        3
+Hospital_expenditure                4
+NUmber_of_past_hospitalizations     2
+Anual_Salary                        6
+region                              0
+charges                             0
+dtype: int64
+In [18]:
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1338 entries, 0 to 1337
+Data columns (total 13 columns):
+ #   Column                           Non-Null Count  Dtype  
+---  ------                           --------------  -----  
+ 0   age                              1338 non-null   float64
+ 1   sex                              1338 non-null   object 
+ 2   bmi                              1335 non-null   float64
+ 3   children                         1333 non-null   float64
+ 4   smoker                           1338 non-null   object 
+ 5   Claim_Amount                     1324 non-null   float64
+ 6   past_consultations               1332 non-null   float64
+ 7   num_of_steps                     1335 non-null   float64
+ 8   Hospital_expenditure             1334 non-null   float64
+ 9   NUmber_of_past_hospitalizations  1336 non-null   float64
+ 10  Anual_Salary                     1332 non-null   float64
+ 11  region                           1338 non-null   object 
+ 12  charges                          1338 non-null   float64
+dtypes: float64(10), object(3)
+memory usage: 136.0+ KB
+In [19]:
+df.dropna(inplace=True)
+In [20]:
+df.isna().sum()
+Out[20]:
+age                                0
+sex                                0
+bmi                                0
+children                           0
+smoker                             0
+Claim_Amount                       0
+past_consultations                 0
+num_of_steps                       0
+Hospital_expenditure               0
+NUmber_of_past_hospitalizations    0
+Anual_Salary                       0
+region                             0
+charges                            0
+dtype: int64
+In [21]:
+#lets check the box plot for the age column
+In [22]:
+sns.boxplot(x='age',data=df)
+plt.show()
+ 
+In [23]:
+df.columns
+Out[23]:
+Index(['age', 'sex', 'bmi', 'children', 'smoker', 'Claim_Amount',
+       'past_consultations', 'num_of_steps', 'Hospital_expenditure',
+       'NUmber_of_past_hospitalizations', 'Anual_Salary', 'region', 'charges'],
+      dtype='object')
+In [24]:
+# create a box plot for all the columns by using a for loop
+In [25]:
+for i in df.columns:
+    if df[i].dtype!='object':
+        sns.boxplot(x=i, data=df)
+        plt.show()
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+In [26]:
+sns.boxplot(x='bmi', data=df)
+plt.show()
+ 
+In [27]:
+# to remove the outliers from this bmi column
+# q1,q3, iqr, lower_level, upper_level
+In [28]:
+Q1=df['bmi'].quantile(0.25)
+Q3=df['bmi'].quantile(0.75)
+iqr=Q3-Q1
+UL=Q3+(1.5*iqr)
+LL=Q1-(1.5*iqr)
+In [29]:
+Q1,Q3
+Out[29]:
+(26.22, 34.6)
+In [30]:
+iqr
+Out[30]:
+8.380000000000003
+In [31]:
+UL,LL
+Out[31]:
+(47.17, 13.649999999999995)
+In [32]:
+df['bmi']=df['bmi'][(df['bmi']>=LL) & (df['bmi']<=UL)]
+In [33]:
+sns.boxplot(x='bmi', data=df)
+plt.show()
+ 
+In [34]:
+Out_col=['past_consultations','charges','Anual_Salary','NUmber_of_past_hospitalizations','Hospital_expenditure']
+In [35]:
+for i in Out_col:
+    Q3=df[i].quantile(0.75)
+    Q1=df[i].quantile(0.25)
+    iqr=Q3-Q1
+    UL=Q3+(1.5*iqr)
+    LL=Q1-(1.5*iqr)
+    
+    df[i]=df[i][(df[i]>LL) & (df[i]<UL)]
+In [36]:
+iqr
+Out[36]:
+6809098.950999999
+In [37]:
+LL,UL
+Out[37]:
+(-6121307.8825, 21115087.921499997)
+In [38]:
+for i in Out_col:
+    sns.boxplot(x = i, data= df)
+    plt.show()
+ 
+ 
+ 
+ 
+ 
+In [39]:
+UL,LL
+Out[39]:
+(21115087.921499997, -6121307.8825)
+In [40]:
+df.corr(numeric_only=True)
+Out[40]:
+	age	bmi	children	Claim_Amount	past_consultations	num_of_steps	Hospital_expenditure	NUmber_of_past_hospitalizations	Anual_Salary	charges
+age	1.000000	0.113943	0.043374	0.109864	0.152782	0.506596	0.142930	NaN	0.295891	0.396044
+bmi	0.113943	1.000000	0.014195	0.093423	0.110509	0.131207	-0.055160	NaN	-0.103316	-0.049146
+children	0.043374	0.014195	1.000000	0.039986	0.060397	0.160978	0.037579	NaN	0.081235	0.073200
+Claim_Amount	0.109864	0.093423	0.039986	1.000000	0.261315	0.395960	0.141320	NaN	0.220020	0.289286
+past_consultations	0.152782	0.110509	0.060397	0.261315	1.000000	0.558390	0.241845	NaN	0.372925	0.448796
+num_of_steps	0.506596	0.131207	0.160978	0.395960	0.558390	1.000000	0.502469	NaN	0.778833	0.910825
+Hospital_expenditure	0.142930	-0.055160	0.037579	0.141320	0.241845	0.502469	1.000000	NaN	0.666537	0.634777
+NUmber_of_past_hospitalizations	NaN	NaN	NaN	NaN	NaN	NaN	NaN	NaN	NaN	NaN
+Anual_Salary	0.295891	-0.103316	0.081235	0.220020	0.372925	0.778833	0.666537	NaN	1.000000	0.938430
+charges	0.396044	-0.049146	0.073200	0.289286	0.448796	0.910825	0.634777	NaN	0.938430	1.000000
+In [41]:
+#better is to use heatmap
+In [42]:
+sns.heatmap(df.corr(numeric_only=True),annot=True, cmap='Blues')
+Out[42]:
+<Axes: >
+ 
+In [43]:
+ df.columns
+Out[43]:
+Index(['age', 'sex', 'bmi', 'children', 'smoker', 'Claim_Amount',
+       'past_consultations', 'num_of_steps', 'Hospital_expenditure',
+       'NUmber_of_past_hospitalizations', 'Anual_Salary', 'region', 'charges'],
+      dtype='object')
+In [44]:
+df.drop('num_of_steps',axis=1, inplace=True)
+In [45]:
+df.drop('NUmber_of_past_hospitalizations', axis=1, inplace=True)
+In [46]:
+sns.heatmap(df.corr(numeric_only=True), annot=True, cmap='Blues')
+Out[46]:
+<Axes: >
+ 
+In [47]:
+# Do label Encoding
+In [48]:
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+Index: 1296 entries, 0 to 1337
+Data columns (total 11 columns):
+ #   Column                Non-Null Count  Dtype  
+---  ------                --------------  -----  
+ 0   age                   1296 non-null   float64
+ 1   sex                   1296 non-null   object 
+ 2   bmi                   1287 non-null   float64
+ 3   children              1296 non-null   float64
+ 4   smoker                1296 non-null   object 
+ 5   Claim_Amount          1296 non-null   float64
+ 6   past_consultations    1293 non-null   float64
+ 7   Hospital_expenditure  1101 non-null   float64
+ 8   Anual_Salary          1107 non-null   float64
+ 9   region                1296 non-null   object 
+ 10  charges               1169 non-null   float64
+dtypes: float64(8), object(3)
+memory usage: 121.5+ KB
+In [49]:
+df['sex'].unique()
+Out[49]:
+array(['male', 'female'], dtype=object)
+In [50]:
+df['sex']=df['sex'].map({'male':0,'female':1})
+In [51]:
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+Index: 1296 entries, 0 to 1337
+Data columns (total 11 columns):
+ #   Column                Non-Null Count  Dtype  
+---  ------                --------------  -----  
+ 0   age                   1296 non-null   float64
+ 1   sex                   1296 non-null   int64  
+ 2   bmi                   1287 non-null   float64
+ 3   children              1296 non-null   float64
+ 4   smoker                1296 non-null   object 
+ 5   Claim_Amount          1296 non-null   float64
+ 6   past_consultations    1293 non-null   float64
+ 7   Hospital_expenditure  1101 non-null   float64
+ 8   Anual_Salary          1107 non-null   float64
+ 9   region                1296 non-null   object 
+ 10  charges               1169 non-null   float64
+dtypes: float64(8), int64(1), object(2)
+memory usage: 121.5+ KB
+In [52]:
+df['smoker'].unique()
+Out[52]:
+array(['no', 'yes'], dtype=object)
+In [53]:
+df['smoker']=df['smoker'].map({'no':0,'yes':1})
+In [54]:
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+Index: 1296 entries, 0 to 1337
+Data columns (total 11 columns):
+ #   Column                Non-Null Count  Dtype  
+---  ------                --------------  -----  
+ 0   age                   1296 non-null   float64
+ 1   sex                   1296 non-null   int64  
+ 2   bmi                   1287 non-null   float64
+ 3   children              1296 non-null   float64
+ 4   smoker                1296 non-null   int64  
+ 5   Claim_Amount          1296 non-null   float64
+ 6   past_consultations    1293 non-null   float64
+ 7   Hospital_expenditure  1101 non-null   float64
+ 8   Anual_Salary          1107 non-null   float64
+ 9   region                1296 non-null   object 
+ 10  charges               1169 non-null   float64
+dtypes: float64(8), int64(2), object(1)
+memory usage: 121.5+ KB
+In [55]:
+df['region'].unique()
+Out[55]:
+array(['southeast', 'southwest', 'northwest', 'northeast'], dtype=object)
+In [56]:
+df['region']=df['region'].map({'southeast':0,'southwest':1,'northwest':2,'northeast':3})
+In [57]:
+df
+Out[57]:
+	age	sex	bmi	children	smoker	Claim_Amount	past_consultations	Hospital_expenditure	Anual_Salary	region	charges
+0	18.0	0	23.210	0.0	0	29087.54313	17.0	4720920.992	55784970.05	0	1121.8739
+1	18.0	0	30.140	0.0	0	39053.67437	7.0	4329831.676	13700885.19	0	1131.5066
+2	18.0	0	33.330	0.0	0	39023.62759	19.0	6884860.774	73523107.27	0	1135.9407
+3	18.0	0	33.660	0.0	0	28185.39332	11.0	4274773.550	75819679.60	0	1136.3994
+4	18.0	0	34.100	0.0	0	14697.85941	16.0	3787293.921	23012320.01	0	1137.0110
+...	...	...	...	...	...	...	...	...	...	...	...
+1333	33.0	1	35.530	0.0	1	63142.25346	32.0	NaN	NaN	2	NaN
+1334	31.0	1	38.095	1.0	1	43419.95227	31.0	NaN	NaN	3	NaN
+1335	52.0	0	34.485	3.0	1	52458.92353	25.0	NaN	NaN	2	NaN
+1336	45.0	0	30.360	0.0	1	69927.51664	34.0	NaN	NaN	0	NaN
+1337	54.0	1	NaN	0.0	1	63982.80926	31.0	NaN	NaN	0	NaN
+1296 rows × 11 columns
+In [58]:
+df.isna().sum()
+Out[58]:
+age                       0
+sex                       0
+bmi                       9
+children                  0
+smoker                    0
+Claim_Amount              0
+past_consultations        3
+Hospital_expenditure    195
+Anual_Salary            189
+region                    0
+charges                 127
+dtype: int64
+In [59]:
+df
+Out[59]:
+	age	sex	bmi	children	smoker	Claim_Amount	past_consultations	Hospital_expenditure	Anual_Salary	region	charges
+0	18.0	0	23.210	0.0	0	29087.54313	17.0	4720920.992	55784970.05	0	1121.8739
+1	18.0	0	30.140	0.0	0	39053.67437	7.0	4329831.676	13700885.19	0	1131.5066
+2	18.0	0	33.330	0.0	0	39023.62759	19.0	6884860.774	73523107.27	0	1135.9407
+3	18.0	0	33.660	0.0	0	28185.39332	11.0	4274773.550	75819679.60	0	1136.3994
+4	18.0	0	34.100	0.0	0	14697.85941	16.0	3787293.921	23012320.01	0	1137.0110
+...	...	...	...	...	...	...	...	...	...	...	...
+1333	33.0	1	35.530	0.0	1	63142.25346	32.0	NaN	NaN	2	NaN
+1334	31.0	1	38.095	1.0	1	43419.95227	31.0	NaN	NaN	3	NaN
+1335	52.0	0	34.485	3.0	1	52458.92353	25.0	NaN	NaN	2	NaN
+1336	45.0	0	30.360	0.0	1	69927.51664	34.0	NaN	NaN	0	NaN
+1337	54.0	1	NaN	0.0	1	63982.80926	31.0	NaN	NaN	0	NaN
+1296 rows × 11 columns
+In [60]:
+df.isna().sum()
+Out[60]:
+age                       0
+sex                       0
+bmi                       9
+children                  0
+smoker                    0
+Claim_Amount              0
+past_consultations        3
+Hospital_expenditure    195
+Anual_Salary            189
+region                    0
+charges                 127
+dtype: int64
+In [61]:
+df.dropna(inplace=True)
+In [62]:
+df.isna().sum()
+Out[62]:
+age                     0
+sex                     0
+bmi                     0
+children                0
+smoker                  0
+Claim_Amount            0
+past_consultations      0
+Hospital_expenditure    0
+Anual_Salary            0
+region                  0
+charges                 0
+dtype: int64
+In [63]:
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+Index: 1090 entries, 0 to 1140
+Data columns (total 11 columns):
+ #   Column                Non-Null Count  Dtype  
+---  ------                --------------  -----  
+ 0   age                   1090 non-null   float64
+ 1   sex                   1090 non-null   int64  
+ 2   bmi                   1090 non-null   float64
+ 3   children              1090 non-null   float64
+ 4   smoker                1090 non-null   int64  
+ 5   Claim_Amount          1090 non-null   float64
+ 6   past_consultations    1090 non-null   float64
+ 7   Hospital_expenditure  1090 non-null   float64
+ 8   Anual_Salary          1090 non-null   float64
+ 9   region                1090 non-null   int64  
+ 10  charges               1090 non-null   float64
+dtypes: float64(8), int64(3)
+memory usage: 102.2 KB
+In [64]:
+x=df.drop(['charges'], axis=1)
+In [65]:
+y=df['charges']
+In [66]:
+x
+Out[66]:
+	age	sex	bmi	children	smoker	Claim_Amount	past_consultations	Hospital_expenditure	Anual_Salary	region
+0	18.0	0	23.210	0.0	0	29087.54313	17.0	4.720921e+06	5.578497e+07	0
+1	18.0	0	30.140	0.0	0	39053.67437	7.0	4.329832e+06	1.370089e+07	0
+2	18.0	0	33.330	0.0	0	39023.62759	19.0	6.884861e+06	7.352311e+07	0
+3	18.0	0	33.660	0.0	0	28185.39332	11.0	4.274774e+06	7.581968e+07	0
+4	18.0	0	34.100	0.0	0	14697.85941	16.0	3.787294e+06	2.301232e+07	0
+...	...	...	...	...	...	...	...	...	...	...
+1131	52.0	1	25.300	2.0	1	46333.65493	12.0	1.997718e+07	6.716120e+08	0
+1132	26.0	1	29.640	4.0	0	47575.32907	23.0	1.899911e+07	6.848551e+08	3
+1133	52.0	0	24.320	3.0	1	40405.58219	22.0	1.695495e+07	6.549545e+08	3
+1135	35.0	1	38.095	2.0	0	56705.00053	19.0	1.820541e+07	6.646015e+08	3
+1140	54.0	0	25.100	3.0	1	45956.96538	19.0	1.709004e+07	6.461079e+08	1
+1090 rows × 10 columns
+In [ ]:
+ 
+In [67]:
+#here the target variable is y which is charges
+In [68]:
+y
+Out[68]:
+0        1121.87390
+1        1131.50660
+2        1135.94070
+3        1136.39940
+4        1137.01100
+           ...     
+1131    24667.41900
+1132    24671.66334
+1133    24869.83680
+1135    24915.04626
+1140    25382.29700
+Name: charges, Length: 1090, dtype: float64
+In [69]:
+from sklearn.model_selection import train_test_split
+In [70]:
+x_train,x_test,y_train, y_test=train_test_split(x,y,train_size=0.8, random_state=100)
+In [71]:
+from sklearn.linear_model import LinearRegression
+In [72]:
+model=LinearRegression()
+model.fit(x_train,y_train)
+Out[72]:
+ LinearRegression
+LinearRegression()
+In [73]:
+x.info()
+<class 'pandas.core.frame.DataFrame'>
+Index: 1090 entries, 0 to 1140
+Data columns (total 10 columns):
+ #   Column                Non-Null Count  Dtype  
+---  ------                --------------  -----  
+ 0   age                   1090 non-null   float64
+ 1   sex                   1090 non-null   int64  
+ 2   bmi                   1090 non-null   float64
+ 3   children              1090 non-null   float64
+ 4   smoker                1090 non-null   int64  
+ 5   Claim_Amount          1090 non-null   float64
+ 6   past_consultations    1090 non-null   float64
+ 7   Hospital_expenditure  1090 non-null   float64
+ 8   Anual_Salary          1090 non-null   float64
+ 9   region                1090 non-null   int64  
+dtypes: float64(7), int64(3)
+memory usage: 93.7 KB
+In [74]:
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+Index: 1090 entries, 0 to 1140
+Data columns (total 11 columns):
+ #   Column                Non-Null Count  Dtype  
+---  ------                --------------  -----  
+ 0   age                   1090 non-null   float64
+ 1   sex                   1090 non-null   int64  
+ 2   bmi                   1090 non-null   float64
+ 3   children              1090 non-null   float64
+ 4   smoker                1090 non-null   int64  
+ 5   Claim_Amount          1090 non-null   float64
+ 6   past_consultations    1090 non-null   float64
+ 7   Hospital_expenditure  1090 non-null   float64
+ 8   Anual_Salary          1090 non-null   float64
+ 9   region                1090 non-null   int64  
+ 10  charges               1090 non-null   float64
+dtypes: float64(8), int64(3)
+memory usage: 102.2 KB
+In [75]:
+df
+Out[75]:
+	age	sex	bmi	children	smoker	Claim_Amount	past_consultations	Hospital_expenditure	Anual_Salary	region	charges
+0	18.0	0	23.210	0.0	0	29087.54313	17.0	4.720921e+06	5.578497e+07	0	1121.87390
+1	18.0	0	30.140	0.0	0	39053.67437	7.0	4.329832e+06	1.370089e+07	0	1131.50660
+2	18.0	0	33.330	0.0	0	39023.62759	19.0	6.884861e+06	7.352311e+07	0	1135.94070
+3	18.0	0	33.660	0.0	0	28185.39332	11.0	4.274774e+06	7.581968e+07	0	1136.39940
+4	18.0	0	34.100	0.0	0	14697.85941	16.0	3.787294e+06	2.301232e+07	0	1137.01100
+...	...	...	...	...	...	...	...	...	...	...	...
+1131	52.0	1	25.300	2.0	1	46333.65493	12.0	1.997718e+07	6.716120e+08	0	24667.41900
+1132	26.0	1	29.640	4.0	0	47575.32907	23.0	1.899911e+07	6.848551e+08	3	24671.66334
+1133	52.0	0	24.320	3.0	1	40405.58219	22.0	1.695495e+07	6.549545e+08	3	24869.83680
+1135	35.0	1	38.095	2.0	0	56705.00053	19.0	1.820541e+07	6.646015e+08	3	24915.04626
+1140	54.0	0	25.100	3.0	1	45956.96538	19.0	1.709004e+07	6.461079e+08	1	25382.29700
+1090 rows × 11 columns
+In [76]:
+x.dropna(inplace=True)
+In [77]:
+y.dropna(inplace=True)
+In [78]:
+x.info()
+<class 'pandas.core.frame.DataFrame'>
+Index: 1090 entries, 0 to 1140
+Data columns (total 10 columns):
+ #   Column                Non-Null Count  Dtype  
+---  ------                --------------  -----  
+ 0   age                   1090 non-null   float64
+ 1   sex                   1090 non-null   int64  
+ 2   bmi                   1090 non-null   float64
+ 3   children              1090 non-null   float64
+ 4   smoker                1090 non-null   int64  
+ 5   Claim_Amount          1090 non-null   float64
+ 6   past_consultations    1090 non-null   float64
+ 7   Hospital_expenditure  1090 non-null   float64
+ 8   Anual_Salary          1090 non-null   float64
+ 9   region                1090 non-null   int64  
+dtypes: float64(7), int64(3)
+memory usage: 93.7 KB
+In [79]:
+#after this step 277 will come
+In [80]:
+pred=model.predict(x_test)
+In [81]:
+pred.shape
+Out[81]:
+(218,)
+In [82]:
+pred
+Out[82]:
+array([ 2753.36300422,  7568.1604316 ,  4146.91454305, 10714.41153786,
+        9317.15664904, 16216.96175589,  7562.52200314,  7199.15856191,
+        4102.5103061 , 20104.36005797,  6659.6976198 ,  6432.79508864,
+        4931.88316846, 29494.45638323, 22803.67127447, 14018.10329776,
+       27413.95017029,  2808.76119061,  2340.00369174,  5855.41598892,
+        5412.67189219,  5967.10946053, 16298.6742087 ,  3550.69843565,
+        7591.60224398,  3600.37746971, 10828.49163472, 10889.50996254,
+       14448.2670766 ,  3632.24178124,  4033.80981577,  3385.41418293,
+        4561.28080187,  9269.71819182,  4379.45006796,  7698.51608895,
+        6219.79629973,  8637.40733097,  1423.45386532, 21173.5219844 ,
+        7001.03864173,  3412.80095736,  9408.84132893,  5242.27653615,
+       20081.64345693,  3966.79923717,  3843.96161729,  2428.13523079,
+        5680.49006751,  5762.05260049,  4890.33979443,  4446.52572701,
+        3077.39130659,  7806.53025106,  4075.50111838, 10592.21862208,
+        9050.45940204,  5850.67558419,  5688.80553221,  9704.08960777,
+       11602.88458236,  7799.42719106, 19945.25619321, 27140.27744808,
+        2520.50997416,  4025.49925666,  5343.30659269,  6554.54394357,
+        8691.21027408, 13477.09678462,  8916.58929405,  1738.32785181,
+        9770.88975085,  8963.65329936, 21676.69892836, 13343.14870995,
+        7785.12071721,  3634.94448847,  7986.71424212,  4487.33582349,
+        7971.1807941 ,  2915.73470109, 10925.69594024, 16311.74614109,
+       14650.81956798,  9124.7068064 ,  4964.67178392,  2942.94936397,
+       11847.76947172,  3391.74553852,  2485.89914609,  9149.4688339 ,
+        6530.46812729, 25798.80277303,  9616.86829295,  4397.6395289 ,
+        6688.66373504,  7485.97002765, 13812.41213332, 18137.1987713 ,
+        7628.5937765 ,  7167.9035562 ,  2314.47449214, 16756.93547076,
+        6169.29574593,  5194.59317017, 11312.60585643,  1980.53171584,
+        4547.25124619, 10635.52081668,  2344.61899767,  9508.02146137,
+        4859.11508494,  3874.64780804, 14798.72025461,  5354.60196559,
+        2706.28019754,  3223.61824589,  1690.67445626,  2605.6977871 ,
+        4256.35794826,  4344.31077091,  4283.23804127,  6718.18877287,
+        8825.19286726,  2125.88623972, 14921.58926518,  4767.18039655,
+        8231.65384561,  5799.35987062, 11882.01051981,  7479.60361793,
+       10190.84950095,  7908.765256  ,  4745.46421231,  7876.6648515 ,
+       19648.22415958,  2418.50990378,  5131.17020778,  5242.78107632,
+        8148.60394334, 12082.74579023,  4027.51597805,  9092.08247517,
+        4780.29387269, 10035.02567195,  6458.77870261, 19750.3426    ,
+       11315.6862341 ,  5274.39641639,  6025.10203232,  9743.99804466,
+        7141.24460278,  2059.05032954,  4532.12035649,  4693.29915011,
+        7035.43107591, 10936.03060737,  2677.99975295,  3171.60129152,
+        7591.2450533 , 23628.84209065, 12507.44577482,  6021.69397039,
+        1241.16278649,  9399.50548862, 22141.7267204 , 10087.27321771,
+        3341.03530835, 13774.5966484 ,  2042.8414326 ,  3275.7174179 ,
+       12945.25076811,  7848.56145534,  6961.80468761, 10503.76827543,
+        4104.42232875, 15356.97836396,  3742.29267897,  2515.47825003,
+        5697.01219596,  3142.19172703,  4767.69422649,  5596.54684686,
+       13579.82945419,  3014.59106206,  7900.77220117,  5524.2108576 ,
+        7228.31119404, 11772.92397197, 29219.21960992, 19626.09450466,
+       11347.09101253,  4816.90678693, 15128.23854941,  6350.22988733,
+        8929.71927715, 13568.04496523,  5663.07615867,  4554.01741191,
+        5050.74821728, 22904.52501035,  6800.58457057, 16723.20856737,
+        8589.29005497, 10599.43780233, 12135.04067782, 21905.15931259,
+        2022.48315732,  7821.19266619,  4752.36182161,  8052.90588143,
+       11803.76775764,  4287.54157579,  3644.17126489,  3275.24961748,
+        6586.81416372,  9163.34306898])
+In [83]:
+from sklearn.metrics import r2_score
+In [84]:
+r2_score(y_test,pred)
+Out[84]:
+0.9440367828343013
+In [ ]:
+ 
+
